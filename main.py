@@ -6,7 +6,7 @@ if __name__ == "__main__":
     while True:
         word = input()
         print()
-        entry = dictionary.search(word)
+        entry = dictionary.search(word, buffer = buffer)
         
         if entry:
             print(entry)
