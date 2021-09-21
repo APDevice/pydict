@@ -1,6 +1,6 @@
 import requests, json, logging as log, os
 # from dataclasses import dataclass
-log.basicConfig(level=log.INFO)
+log.basicConfig(level=log.DEBUG)
 
 class Entry:
     """ stores values from dictonary API """
@@ -78,8 +78,12 @@ class Buffer:
             try:
                 entry = Entry(json.loads(f.read()))
                 self.dict[entry.word] = entry
+                log.debug(f"{filename} loaded successfully")
             except:
+                log.debug(f"{filename} failed to load")
                 raise ValueError("invalid file in buffer directory")
+            
+
 
     def save(self, entry: Entry):
         """ saves entry to local disk """
@@ -97,7 +101,7 @@ class Buffer:
         for f in os.scandir(Buffer.BUFFER_DIR):
             if f.is_file() and f.name.endswith(".json"):
                 try:
-                    self.load(f)
+                    self.load(f.name)
                 except:
                     continue # ignore invalid files on load
         
