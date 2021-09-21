@@ -37,16 +37,19 @@ Phonetic: {self.phonetic if self.phonetic else "Unknown"}
         returns raw data from dictionary"""
         return json.dumps(self.rawData, indent = 2)
 
-
+# TODO rework local storage format to more efficently store relevant data
 class Buffer:
     """   allows dictionary entries to be stored locally to minimize API calls   """
+    # name of directory used to store entries on local disk
+    BUFFER_DIR: str = "buffer" 
+
     def __init__(self):
         self.dict = dict()
         self.__load_all()
 
     def contains(self, word: str) -> bool:
         """ returns true if file in buffer """
-        return (word in self.dict())
+        return word in self.dict
 
     def get(self, word: str) -> Entry:
         """ returns entry for word from buffer
@@ -66,10 +69,12 @@ class Buffer:
         self.dict[entry.word] = entry
 
     def load(self, filename: str):
-        """ loads JSON files, converts them to Entry format, and stores in buffer
+        """ loads API files, converts them to Entry format, and stores in buffer
         
-        ValueError is raised if conversion to Entry fails"""
-        with open(filename, "r") as f:
+        ValueError is raised if conversion to Entry fails
+        """
+        file_path = os.path.join(Buffer.BUFFER_DIR, filename)
+        with open(file_path, "r") as f:
             try:
                 entry = Entry(json.loads(f.read()))
                 self.dict[entry.word] = entry
@@ -78,21 +83,21 @@ class Buffer:
 
     def save(self, entry: Entry):
         """ saves entry to local disk """
-        with open(f"{entry.word}.json", "w") as f:
-            f.write(entry.rawData)
+        file_path = os.path.join(Buffer.BUFFER_DIR, f"{entry.word}.json")
+        with open(file_path, "w") as f:
+            f.write(json.dumps(entry.rawData))
 
     def __load_all(self):
         """ loads alls files in buffer directory
 
         invalid files are ignored. """
-        BUFFER_DIR = "buffer"
-        if not os.path.isdir(BUFFER_DIR):
-            os.mkdir(BUFFER_DIR)
+        if not os.path.isdir(Buffer.BUFFER_DIR):
+            os.mkdir(Buffer.BUFFER_DIR)
             return
-        for fn in os.scandir(BUFFER_DIR):
-            if fn.endswith(".json"):
+        for f in os.scandir(Buffer.BUFFER_DIR):
+            if f.is_file() and f.name.endswith(".json"):
                 try:
-                    self.load(fn)
+                    self.load(f)
                 except:
                     continue # ignore invalid files on load
         
