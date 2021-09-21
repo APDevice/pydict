@@ -1,6 +1,6 @@
 import requests, json, logging as log, os
 # from dataclasses import dataclass
-log.basicConfig(level=log.DEBUG)
+log.basicConfig(level=log.INFO)
 
 class Entry:
     """ stores values from dictonary API """
